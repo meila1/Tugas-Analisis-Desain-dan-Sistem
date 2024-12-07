@@ -1,0 +1,92 @@
+-- SQL Dump for Simple Library System
+-- Version 1.0
+-- Host: localhost
+-- Database: library_system
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+-- Database: library_system
+-- --------------------------------------------------------
+
+-- Table structure for table members
+CREATE TABLE members (
+  member_id INT(11) NOT NULL AUTO_INCREMENT,
+  full_name VARCHAR(150) NOT NULL,
+  member_email VARCHAR(200) NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  membership_type ENUM('standard', 'premium') NOT NULL,
+  join_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (member_id),
+  UNIQUE KEY (member_email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+-- Table structure for table library_books
+CREATE TABLE library_books (
+  book_id INT(11) NOT NULL AUTO_INCREMENT,
+  book_title VARCHAR(255) NOT NULL,
+  book_author VARCHAR(255) NOT NULL,
+  publisher_name VARCHAR(255) NOT NULL,
+  year_of_publication YEAR(4) NOT NULL,
+  category VARCHAR(120) NOT NULL,
+  available_copies INT(11) NOT NULL,
+  PRIMARY KEY (book_id),
+  INDEX (book_author)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+-- Table structure for table borrow_records
+CREATE TABLE borrow_records (
+  borrow_id INT(11) NOT NULL AUTO_INCREMENT,
+  member_id INT(11) NOT NULL,
+  book_id INT(11) NOT NULL,
+  borrowed_on DATE NOT NULL,
+  due_date DATE NOT NULL,
+  return_status ENUM('borrowed', 'returned') NOT NULL,
+  PRIMARY KEY (borrow_id),
+  FOREIGN KEY (member_id) REFERENCES members(member_id) ON DELETE CASCADE,
+  FOREIGN KEY (book_id) REFERENCES library_books(book_id) ON DELETE CASCADE,
+  INDEX (borrowed_on),
+  INDEX (due_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+-- Table structure for table librarians
+CREATE TABLE librarians (
+  librarian_id INT(11) NOT NULL AUTO_INCREMENT,
+  librarian_name VARCHAR(255) NOT NULL,
+  contact_number VARCHAR(20) NOT NULL,
+  email_address VARCHAR(200) NOT NULL,
+  employment_date DATE NOT NULL,
+  PRIMARY KEY (librarian_id),
+  UNIQUE KEY (email_address)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+-- Table structure for table fines
+CREATE TABLE fines (
+  fine_id INT(11) NOT NULL AUTO_INCREMENT,
+  borrow_id INT(11) NOT NULL,
+  fine_amount DECIMAL(10, 2) NOT NULL,
+  paid_status ENUM('unpaid', 'paid') NOT NULL,
+  fine_date DATE NOT NULL,
+  PRIMARY KEY (fine_id),
+  FOREIGN KEY (borrow_id) REFERENCES borrow_records(borrow_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
